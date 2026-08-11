@@ -377,7 +377,12 @@ export function PdfFlipbook() {
       const pdfjs = await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc = `${ASSET_BASE}/pdf.worker.min.mjs`;
       const pdfSource = typeof source === "string"
-        ? { url: new URL(source, window.location.href).href }
+        ? {
+            url: new URL(source, window.location.href).href,
+            disableAutoFetch: true,
+            disableStream: true,
+            rangeChunkSize: 262_144,
+          }
         : { data: source };
       const nextPdf = await pdfjs.getDocument(pdfSource).promise;
       const firstPage = await nextPdf.getPage(1);
