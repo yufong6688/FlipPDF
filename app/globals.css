@@ -86,6 +86,16 @@ button { color: inherit; }
 .reader-topbar .brand-mark i { border-color: white; }
 .reader-topbar .replace-button { border-color: white; background: rgba(23, 25, 20, 0.62); }
 .reader-topbar .replace-button:hover { color: var(--ink); background: var(--acid); border-color: var(--ink); }
+.reader-file-actions { display: flex; align-items: center; gap: 8px; }
+.library-select {
+  min-width: 150px;
+  padding: 10px 30px 10px 12px;
+  color: inherit;
+  background: rgba(23, 25, 20, 0.62);
+  border: 1px solid currentColor;
+  font-size: 13px;
+  font-weight: 800;
+}
 
 .welcome {
   min-height: calc(100svh - 78px);
@@ -126,6 +136,25 @@ button { color: inherit; }
 }
 .upload-button:hover { transform: translate(3px, 3px); box-shadow: 4px 4px 0 var(--ink); }
 .upload-button.is-loading { cursor: wait; opacity: 0.72; }
+.library-picker {
+  width: min(100%, 360px);
+  margin: 0 0 14px;
+  display: grid;
+  gap: 7px;
+  color: #55574f;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: left;
+}
+.library-picker select {
+  width: 100%;
+  padding: 13px 38px 13px 14px;
+  color: var(--ink);
+  background: rgba(255,255,255,.7);
+  border: 1px solid var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+}
 .privacy-note { margin: 22px 0 0; color: #777970; font-size: 12px; }
 .privacy-note span { color: var(--orange); font-size: 9px; }
 .error-message { color: #a22816; font-size: 13px; font-weight: 700; }
@@ -429,6 +458,7 @@ button { color: inherit; }
   .welcome-copy { margin: 0 auto; text-align: center; }
   .eyebrow::before { display: none; }
   .intro, .upload-button { margin-left: auto; margin-right: auto; }
+  .library-picker { margin-left: auto; margin-right: auto; }
   .hero-book { width: min(92vw, 680px); margin: 12px auto 0; }
 }
 
@@ -443,6 +473,9 @@ button { color: inherit; }
   .reader-side-left { left: 0; background: linear-gradient(to right, rgba(242, 239, 230, 0.9), transparent); }
   .reader-side-right { right: 0; background: linear-gradient(to left, rgba(242, 239, 230, 0.9), transparent); }
   .reader-side button { pointer-events: auto; }
+  .reader-file-actions { max-width: 72vw; }
+  .library-select { min-width: 0; max-width: 42vw; padding: 8px 22px 8px 8px; font-size: 10px; }
+  .reader-topbar .replace-button { padding: 8px; font-size: 10px; }
   .reader-identity .eyebrow { font-size: 7px; letter-spacing: 0.08em; }
   .reader-identity h1 { font-size: 13px; line-height: 1.15; overflow-wrap: anywhere; }
   .page-status { font-size: 9px; line-height: 1.45; }

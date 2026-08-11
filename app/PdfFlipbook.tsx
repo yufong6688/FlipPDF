@@ -6,6 +6,8 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 type TurnDirection = "next" | "previous" | null;
 type FlipEffect = "classic" | "curl" | "slide" | "fade" | "lift";
 type PendingTurn = { direction: Exclude<TurnDirection, null>; target: number } | null;
+type PdfLibraryItem = { name: string; file: string };
+const ASSET_BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const TURN_DURATION = 850;
 const PAGE_CLICK_DELAY = 340;
 const LONG_PRESS_DURATION = 650;
@@ -129,6 +131,7 @@ export function PdfFlipbook() {
   const [zoomScale, setZoomScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanLocked, setIsPanLocked] = useState(false);
+  const [pdfLibrary, setPdfLibrary] = useState<PdfLibraryItem[]>([]);
   const turnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pageClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -157,7 +160,7 @@ export function PdfFlipbook() {
   }, []);
 
   useEffect(() => {
-    const audio = new Audio("/page-turn.wav");
+    const audio = new Audio(`${ASSET_BASE}/page-turn.wav`);
     audio.preload = "auto";
     audio.volume = 0.85;
     pageTurnAudio.current = audio;
@@ -165,6 +168,13 @@ export function PdfFlipbook() {
       audio.pause();
       pageTurnAudio.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    fetch(`${ASSET_BASE}/pdf-library.json`)
+      .then((response) => response.ok ? response.json() : [])
+      .then((items: PdfLibraryItem[]) => setPdfLibrary(items))
+      .catch(() => setPdfLibrary([]));
   }, []);
 
   useEffect(() => {
@@ -360,20 +370,12 @@ export function PdfFlipbook() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [turnPage]);
 
-  async function loadPdf(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-      setError("請選擇 PDF 檔案。");
-      return;
-    }
-
+  async function openPdf(data: ArrayBuffer, name: string) {
     setIsLoading(true);
     setError("");
     try {
       const pdfjs = await import("pdfjs-dist");
-      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-      const data = await file.arrayBuffer();
+      pdfjs.GlobalWorkerOptions.workerSrc = `${ASSET_BASE}/pdf.worker.min.mjs`;
       const nextPdf = await pdfjs.getDocument({ data }).promise;
       const firstPage = await nextPdf.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1 });
@@ -387,12 +389,38 @@ export function PdfFlipbook() {
       setPan({ x: 0, y: 0 });
       setIsPanLocked(false);
       setPageRatio(viewport.width / viewport.height);
-      setFileName(file.name.replace(/\.pdf$/i, ""));
+      setFileName(name.replace(/\.pdf$/i, ""));
     } catch {
       setError("這份 PDF 無法開啟，可能已損壞或受密碼保護。");
     } finally {
       setIsLoading(false);
-      event.target.value = "";
+    }
+  }
+
+  async function loadPdf(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("請選擇 PDF 檔案。");
+      return;
+    }
+    await openPdf(await file.arrayBuffer(), file.name);
+    event.target.value = "";
+  }
+
+  async function loadLibraryPdf(file: string) {
+    if (!file) return;
+    const item = pdfLibrary.find((entry) => entry.file === file);
+    if (!item) return;
+    setIsLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${ASSET_BASE}/pdfs/${encodeURIComponent(item.file)}`);
+      if (!response.ok) throw new Error("PDF request failed");
+      await openPdf(await response.arrayBuffer(), item.name);
+    } catch {
+      setError("書庫中的 PDF 無法載入，請稍後再試。");
+      setIsLoading(false);
     }
   }
 
@@ -418,10 +446,18 @@ export function PdfFlipbook() {
           <span>FLIP PDF</span>
         </a>
         {pdf && (
-          <label className="replace-button">
-            更換 PDF
-            <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} />
-          </label>
+          <div className="reader-file-actions">
+            {pdfLibrary.length > 0 && (
+              <select className="library-select" defaultValue="" onChange={(event) => { void loadLibraryPdf(event.target.value); event.target.value = ""; }} disabled={isLoading} aria-label="從 PDF 書庫選擇">
+                <option value="" disabled>PDF 書庫</option>
+                {pdfLibrary.map((item) => <option key={item.file} value={item.file}>{item.name}</option>)}
+              </select>
+            )}
+            <label className="replace-button">
+              選擇本機 PDF
+              <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} />
+            </label>
+          </div>
         )}
       </header>
 
@@ -431,6 +467,15 @@ export function PdfFlipbook() {
             <p className="eyebrow">YOUR PDF, REIMAGINED</p>
             <h1>把文件，<br />變成一本會翻頁的書。</h1>
             <p className="intro">不必上傳，不必等待。選擇 PDF，立即以雙頁、滑動與鍵盤操作開始閱讀。</p>
+            {pdfLibrary.length > 0 && (
+              <label className="library-picker">
+                <span>從 PDF 書庫選讀</span>
+                <select defaultValue="" onChange={(event) => void loadLibraryPdf(event.target.value)} disabled={isLoading}>
+                  <option value="" disabled>選擇一本 PDF</option>
+                  {pdfLibrary.map((item) => <option key={item.file} value={item.file}>{item.name}</option>)}
+                </select>
+              </label>
+            )}
             <label className={`upload-button${isLoading ? " is-loading" : ""}`}>
               <span>{isLoading ? "正在整理書頁…" : "選擇 PDF"}</span>
               <span aria-hidden="true">↗</span>

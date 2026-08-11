@@ -6,6 +6,8 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "prebuild": "node scripts/generate-pdf-library.mjs",
+    "postbuild": "node scripts/prepare-github-pages.mjs",
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",

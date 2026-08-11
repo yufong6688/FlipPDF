@@ -26,3 +26,16 @@ npm run dev
 ```bash
 npm test
 ```
+# FLIP PDF
+
+將 PDF 以封面、雙頁與自然翻頁效果呈現的瀏覽器閱讀器。
+
+## 新增 PDF 到網站書庫
+
+1. 將 `.pdf` 檔案放進 `public/pdfs/`。
+2. 提交並推送到 GitHub 的 `main` 分支。
+3. GitHub Actions 會自動掃描該目錄、建立書庫清單並重新發布網站。
+
+PDF 檔名會直接顯示為書名。放進這個目錄的檔案會隨 GitHub Pages 公開，請勿加入私人或機密文件。
+
+網站同時保留「選擇本機 PDF」功能；本機選取的檔案只會在使用者的瀏覽器中處理。
