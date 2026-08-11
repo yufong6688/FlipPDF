@@ -379,7 +379,6 @@ export function PdfFlipbook() {
       const pdfSource = typeof source === "string"
         ? {
             url: new URL(source, window.location.href).href,
-            disableAutoFetch: true,
             disableStream: true,
             rangeChunkSize: 262_144,
           }
