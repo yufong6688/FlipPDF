@@ -6,7 +6,7 @@ import type { PDFDocumentProxy } from "pdfjs-dist";
 type TurnDirection = "next" | "previous" | null;
 type FlipEffect = "classic" | "curl" | "slide" | "fade" | "lift";
 type PendingTurn = { direction: Exclude<TurnDirection, null>; target: number } | null;
-type PdfLibraryItem = { name: string; file: string };
+type PdfLibraryItem = { name: string; file: string; version: string };
 const ASSET_BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const TURN_DURATION = 850;
 const PAGE_CLICK_DELAY = 340;
@@ -418,7 +418,7 @@ export function PdfFlipbook() {
     setIsLoading(true);
     setError("");
     try {
-      await openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(item.file)}`, item.name);
+      await openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(item.file)}?v=${encodeURIComponent(item.version)}`, item.name);
     } catch {
       setError("書庫中的 PDF 無法載入，請稍後再試。");
       setIsLoading(false);

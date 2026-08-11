@@ -1,6 +1,7 @@
 [
   {
     "name": "test",
-    "file": "test.pdf"
+    "file": "test.pdf",
+    "version": "53845728d19d"
   }
 ]
