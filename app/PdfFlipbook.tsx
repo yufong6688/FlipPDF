@@ -119,6 +119,7 @@ export function PdfFlipbook() {
   const [page, setPage] = useState(1);
   const [pageRatio, setPageRatio] = useState(0.707);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [turning, setTurning] = useState<TurnDirection>(null);
   const [pendingTurn, setPendingTurn] = useState<PendingTurn>(null);
@@ -372,18 +373,19 @@ export function PdfFlipbook() {
 
   async function openPdf(source: ArrayBuffer | string, name: string) {
     setIsLoading(true);
+    setLoadingProgress(null);
     setError("");
     try {
       const pdfjs = await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc = `${ASSET_BASE}/pdf.worker.min.mjs`;
       const pdfSource = typeof source === "string"
-        ? {
-            url: new URL(source, window.location.href).href,
-            disableStream: true,
-            rangeChunkSize: 262_144,
-          }
+        ? { url: new URL(source, window.location.href).href }
         : { data: source };
-      const nextPdf = await pdfjs.getDocument(pdfSource).promise;
+      const loadingTask = pdfjs.getDocument(pdfSource);
+      loadingTask.onProgress = ({ loaded, total }) => {
+        if (total > 0) setLoadingProgress(Math.min(100, Math.round((loaded / total) * 100)));
+      };
+      const nextPdf = await loadingTask.promise;
       const firstPage = await nextPdf.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1 });
 
@@ -401,6 +403,7 @@ export function PdfFlipbook() {
       setError("這份 PDF 無法開啟，可能已損壞或受密碼保護。");
     } finally {
       setIsLoading(false);
+      setLoadingProgress(null);
     }
   }
 
@@ -517,7 +520,7 @@ export function PdfFlipbook() {
               </label>
             )}
             <label className={`upload-button${isLoading ? " is-loading" : ""}`}>
-              <span>{isLoading ? "正在整理書頁…" : "選擇 PDF"}</span>
+              <span>{isLoading ? (loadingProgress === null ? "正在準備書頁…" : `正在下載 ${loadingProgress}%`) : "選擇 PDF"}</span>
               <span aria-hidden="true">↗</span>
               <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} disabled={isLoading} />
             </label>
