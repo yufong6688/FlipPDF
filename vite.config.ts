@@ -42,7 +42,10 @@ export default defineConfig(async () => {
 
   const isGitHubPages = process.env.GITHUB_PAGES === "true";
   if (isGitHubPages) {
-    return { plugins: [vinext()] };
+    return {
+      plugins: [vinext()],
+      build: { rolldownOptions: { external: ["cloudflare:workers"] } },
+    };
   }
 
   // Wrangler snapshots its log path while the Cloudflare plugin is imported.

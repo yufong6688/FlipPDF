@@ -56,7 +56,6 @@ function PageCanvas({ document, pageNumber, onReady }: { document: PDFDocumentPr
       onReadyRef.current?.(pageNumber);
     }
 
-    setFailed(false);
     renderPage().catch((error: unknown) => {
       if (!cancelled && !(error instanceof Error && error.name === "RenderingCancelledException")) {
         setFailed(true);
@@ -132,6 +131,7 @@ export function PdfFlipbook() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanLocked, setIsPanLocked] = useState(false);
   const [pdfLibrary, setPdfLibrary] = useState<PdfLibraryItem[]>([]);
+  const [remoteMode, setRemoteMode] = useState<"share" | "admin" | null>(null);
   const turnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pageClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -424,6 +424,34 @@ export function PdfFlipbook() {
     }
   }
 
+  useEffect(() => {
+    const parameters = new URLSearchParams(window.location.search);
+    const shareToken = parameters.get("share");
+    const adminPdf = parameters.get("adminPdf");
+    if (!shareToken && !adminPdf) return;
+
+    const mode = shareToken ? "share" : "admin";
+    const url = shareToken
+      ? `/api/share/${encodeURIComponent(shareToken)}`
+      : `/api/admin/documents/${encodeURIComponent(adminPdf ?? "")}`;
+    queueMicrotask(() => {
+      setRemoteMode(mode);
+      setIsLoading(true);
+      setError("");
+      fetch(url, { cache: "no-store" })
+        .then(async (response) => {
+          if (!response.ok) throw new Error(response.status === 401 ? "請先以管理者帳號登入。" : "分享連結無效、已撤銷或已過期。");
+          const encodedName = response.headers.get("X-PDF-Name");
+          const name = encodedName ? decodeURIComponent(encodedName) : "分享文件";
+          await openPdf(await response.arrayBuffer(), name);
+        })
+        .catch((loadError: Error) => {
+          setError(loadError.message);
+          setIsLoading(false);
+        });
+    });
+  }, []);
+
   const bookStyle = {
     "--page-ratio": pageRatio,
     transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoomScale})`,
@@ -445,7 +473,7 @@ export function PdfFlipbook() {
           <span className="brand-mark" aria-hidden="true"><i /><i /></span>
           <span>FLIP PDF</span>
         </a>
-        {pdf && (
+        {pdf && !remoteMode && (
           <div className="reader-file-actions">
             {pdfLibrary.length > 0 && (
               <select className="library-select" defaultValue="" onChange={(event) => { void loadLibraryPdf(event.target.value); event.target.value = ""; }} disabled={isLoading} aria-label="從 PDF 書庫選擇">
@@ -461,7 +489,14 @@ export function PdfFlipbook() {
         )}
       </header>
 
-      {!pdf ? (
+      {!pdf ? (remoteMode ? (
+        <section className="shared-loading" aria-live="polite">
+          <span className="brand-mark" aria-hidden="true"><i /><i /></span>
+          <h1>{error ? "無法開啟文件" : "正在開啟私密文件…"}</h1>
+          <p>{error || "請稍候，文件正在安全載入。"}</p>
+          {remoteMode === "admin" && error && <a href="/signin-with-chatgpt?return_to=%2F">管理者登入</a>}
+        </section>
+      ) : (
         <section className="welcome" id="top">
           <div className="welcome-copy">
             <p className="eyebrow">YOUR PDF, REIMAGINED</p>
@@ -481,6 +516,7 @@ export function PdfFlipbook() {
               <span aria-hidden="true">↗</span>
               <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} disabled={isLoading} />
             </label>
+            {ASSET_BASE === "" && <a className="server-library-button" href="/admin">切換至私密伺服器書庫</a>}
             {error && <p className="error-message" role="alert">{error}</p>}
             <p className="privacy-note"><span aria-hidden="true">●</span> 檔案只在你的瀏覽器中處理</p>
           </div>
@@ -489,7 +525,7 @@ export function PdfFlipbook() {
             <div className="hero-page hero-right"><span>02</span><div className="hero-circle" /><em>Turn ideas<br />into pages.</em></div>
           </div>
         </section>
-      ) : (
+      )) : (
         <section ref={readerRef} className="reader" aria-label={`${fileName} PDF 閱讀器`} aria-busy={isBusy}>
           <div className="reader-stage">
             <aside className="reader-side reader-side-left">

@@ -136,6 +136,7 @@ button { color: inherit; }
 }
 .upload-button:hover { transform: translate(3px, 3px); box-shadow: 4px 4px 0 var(--ink); }
 .upload-button.is-loading { cursor: wait; opacity: 0.72; }
+.server-library-button { display: inline-block; margin-top: 18px; color: inherit; font-size: 13px; font-weight: 900; text-underline-offset: 4px; }
 .library-picker {
   width: min(100%, 360px);
   margin: 0 0 14px;
@@ -158,6 +159,59 @@ button { color: inherit; }
 .privacy-note { margin: 22px 0 0; color: #777970; font-size: 12px; }
 .privacy-note span { color: var(--orange); font-size: 9px; }
 .error-message { color: #a22816; font-size: 13px; font-weight: 700; }
+
+.shared-loading {
+  min-height: calc(100svh - 78px);
+  padding: 28px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+}
+.shared-loading h1 { margin: 24px 0 8px; font-size: clamp(32px, 5vw, 64px); letter-spacing: -.05em; }
+.shared-loading p { margin: 0; color: #66685f; }
+.shared-loading a { margin-top: 22px; color: inherit; font-weight: 900; }
+
+.admin-shell { min-height: 100svh; padding: clamp(24px, 5vw, 72px); background: var(--paper); }
+.admin-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+.admin-header h1, .admin-signin h1 { margin: 0; font-size: clamp(40px, 6vw, 78px); letter-spacing: -.07em; line-height: 1; }
+.admin-header p:not(.eyebrow) { max-width: 620px; margin: 18px 0 0; color: #5f6059; }
+.admin-header-actions { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.admin-header-actions > a, .admin-upload, .admin-primary-link {
+  padding: 12px 16px;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  background: rgba(255,255,255,.65);
+  font-size: 13px;
+  font-weight: 900;
+  text-decoration: none;
+  cursor: pointer;
+}
+.admin-upload { position: relative; overflow: hidden; background: var(--acid); }
+.admin-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.admin-upload.is-busy { opacity: .5; cursor: wait; }
+.admin-message { margin: 18px 0 0; padding: 11px 14px; color: #294008; background: rgba(217,255,67,.4); font-size: 13px; font-weight: 800; }
+.admin-panel { margin-top: 28px; padding: clamp(20px, 3vw, 34px); border: 1px solid var(--line); background: rgba(255,255,255,.5); }
+.admin-panel h2 { margin: 0; font-size: 22px; }
+.admin-panel-title { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.admin-panel-title label { display: flex; align-items: center; gap: 8px; color: #5f6059; font-size: 12px; font-weight: 800; }
+.admin-panel-title select { padding: 7px 28px 7px 8px; background: white; border: 1px solid var(--line); }
+.admin-empty { color: #777970; }
+.admin-document-list, .admin-share-list { display: grid; }
+.admin-document, .admin-share { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 0; border-top: 1px solid var(--line); }
+.admin-document:first-child, .admin-share:first-child { border-top: 0; }
+.admin-document h3 { margin: 0 0 5px; font-size: 17px; }
+.admin-document p { margin: 0; color: #777970; font-size: 11px; }
+.admin-document-actions { display: flex; gap: 7px; }
+.admin-document-actions a, .admin-document-actions button, .admin-share button { padding: 8px 10px; color: inherit; background: white; border: 1px solid var(--ink); font-size: 11px; font-weight: 900; text-decoration: none; cursor: pointer; }
+.admin-document-actions button:not(.danger) { background: var(--acid); }
+.admin-document-actions .danger { color: #a22816; }
+.admin-share > div { display: grid; gap: 4px; }
+.admin-share span { color: #777970; font-size: 11px; }
+.admin-share.is-inactive { opacity: .48; }
+.admin-signin { display: grid; place-content: center; justify-items: start; }
+.admin-signin > p:not(.eyebrow) { color: #5f6059; }
+.admin-primary-link { margin-top: 16px; background: var(--acid); }
 
 .hero-book {
   width: min(62vw, 850px);
@@ -502,6 +556,12 @@ button { color: inherit; }
   .effect-curl.is-turning-next .book-layer-current .left-page { z-index: 10; animation: page-curl-next 850ms cubic-bezier(.42,.08,.12,1) both; }
   .effect-classic.is-turning-next .book-layer-current .left-page::after { animation: turn-page-shading 850ms ease-in-out both; }
   .page-hit { width: 32%; }
+  .admin-header { align-items: flex-start; flex-direction: column; }
+  .admin-header-actions { width: 100%; white-space: normal; }
+  .admin-header-actions > * { flex: 1; text-align: center; }
+  .admin-panel-title, .admin-document, .admin-share { align-items: stretch; flex-direction: column; }
+  .admin-document-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .admin-document-actions > * { text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
