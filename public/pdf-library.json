@@ -1,1 +1,6 @@
-[]
+[
+  {
+    "name": "test",
+    "file": "test.pdf"
+  }
+]
