@@ -370,13 +370,13 @@ export function PdfFlipbook() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [turnPage]);
 
-  async function openPdf(data: ArrayBuffer, name: string) {
+  async function openPdf(source: ArrayBuffer | string, name: string) {
     setIsLoading(true);
     setError("");
     try {
       const pdfjs = await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc = `${ASSET_BASE}/pdf.worker.min.mjs`;
-      const nextPdf = await pdfjs.getDocument({ data }).promise;
+      const nextPdf = await pdfjs.getDocument(typeof source === "string" ? source : { data: source }).promise;
       const firstPage = await nextPdf.getPage(1);
       const viewport = firstPage.getViewport({ scale: 1 });
 
@@ -415,9 +415,7 @@ export function PdfFlipbook() {
     setIsLoading(true);
     setError("");
     try {
-      const response = await fetch(`${ASSET_BASE}/pdfs/${encodeURIComponent(item.file)}`);
-      if (!response.ok) throw new Error("PDF request failed");
-      await openPdf(await response.arrayBuffer(), item.name);
+      await openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(item.file)}`, item.name);
     } catch {
       setError("書庫中的 PDF 無法載入，請稍後再試。");
       setIsLoading(false);
