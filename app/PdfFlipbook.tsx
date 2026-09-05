@@ -126,6 +126,7 @@ export function PdfFlipbook() {
   const [flipEffect, setFlipEffect] = useState<FlipEffect>("slide");
   const [isSinglePage, setIsSinglePage] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isKiosk, setIsKiosk] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isPageLocked, setIsPageLocked] = useState(false);
   const [zoomScale, setZoomScale] = useState(1);
@@ -442,8 +443,12 @@ export function PdfFlipbook() {
       const fileName = pdfFile.replace(/\.pdf$/i, "");
       setIsLoading(true);
       setError("");
+      setIsKiosk(true);
       queueMicrotask(() => {
         void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}`, fileName);
+        setTimeout(() => {
+          document.querySelector(".reader")?.requestFullscreen?.();
+        }, 2000);
       });
       return;
     }
@@ -487,27 +492,29 @@ export function PdfFlipbook() {
   }
 
   return (
-    <main className="app-shell">
-      <header className={`topbar${pdf ? " reader-topbar" : ""}`}>
-        <a className="brand" href="#top" aria-label="Flip PDF 首頁">
-          <span className="brand-mark" aria-hidden="true"><i /><i /></span>
-          <span>FLIP PDF</span>
-        </a>
-        {pdf && !remoteMode && (
-          <div className="reader-file-actions">
-            {pdfLibrary.length > 0 && (
-              <select className="library-select" defaultValue="" onChange={(event) => { void loadLibraryPdf(event.target.value); event.target.value = ""; }} disabled={isLoading} aria-label="從 PDF 書庫選擇">
-                <option value="" disabled>PDF 書庫</option>
-                {pdfLibrary.map((item) => <option key={item.file} value={item.file}>{item.name}</option>)}
-              </select>
-            )}
-            <label className="replace-button">
-              選擇本機 PDF
-              <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} />
-            </label>
-          </div>
-        )}
-      </header>
+    <main className={`app-shell${isKiosk ? " kiosk-shell" : ""}`}>
+      {!isKiosk && (
+        <header className={`topbar${pdf ? " reader-topbar" : ""}`}>
+          <a className="brand" href="#top" aria-label="Flip PDF 首頁">
+            <span className="brand-mark" aria-hidden="true"><i /><i /></span>
+            <span>FLIP PDF</span>
+          </a>
+          {pdf && !remoteMode && (
+            <div className="reader-file-actions">
+              {pdfLibrary.length > 0 && (
+                <select className="library-select" defaultValue="" onChange={(event) => { void loadLibraryPdf(event.target.value); event.target.value = ""; }} disabled={isLoading} aria-label="從 PDF 書庫選擇">
+                  <option value="" disabled>PDF 書庫</option>
+                  {pdfLibrary.map((item) => <option key={item.file} value={item.file}>{item.name}</option>)}
+                </select>
+              )}
+              <label className="replace-button">
+                選擇本機 PDF
+                <input type="file" accept="application/pdf,.pdf" onChange={loadPdf} />
+              </label>
+            </div>
+          )}
+        </header>
+      )}
 
       {!pdf ? (remoteMode ? (
         <section className="shared-loading" aria-live="polite">
@@ -515,6 +522,10 @@ export function PdfFlipbook() {
           <h1>{error ? "無法開啟文件" : "正在開啟私密文件…"}</h1>
           <p>{error || "請稍候，文件正在安全載入。"}</p>
           {remoteMode === "admin" && error && <a href="/signin-with-chatgpt?return_to=%2F">管理者登入</a>}
+        </section>
+      ) : isKiosk ? (
+        <section className="kiosk-loading" aria-live="polite">
+          <p>{error || "正在載入…"}</p>
         </section>
       ) : (
         <section className="welcome" id="top">
@@ -545,7 +556,37 @@ export function PdfFlipbook() {
             <div className="hero-page hero-right"><span>02</span><div className="hero-circle" /><em>Turn ideas<br />into pages.</em></div>
           </div>
         </section>
-      )) : (
+      )) : isKiosk ? (
+        <section ref={readerRef} className="reader kiosk-reader" aria-label={`${fileName} PDF 閱讀器`}>
+          <div className="book-viewport kiosk-viewport">
+            <div
+              ref={bookRef}
+              className={`book effect-${flipEffect}${isCover && !pendingTurn ? " is-cover" : ""}${turning ? ` is-turning-${turning}` : ""}${isZoomed ? " is-zoomed" : ""}${isPanLocked ? " is-pan-locked" : ""}`}
+              style={bookStyle}
+              onDoubleClick={toggleZoom}
+              onPointerDown={handleBookPointerDown}
+              onPointerMove={handleBookPointerMove}
+              onPointerUp={finishBookPointer}
+              onPointerCancel={finishBookPointer}
+            >
+              <button className="page-hit page-hit-left" onClick={() => queuePageTurn("previous")} aria-disabled={!canGoPrevious || isPageLocked || isZoomed} aria-label="上一頁" />
+              {pendingTurn && (
+                <BookLayer
+                  key={`spread-${pendingTurn.target}`}
+                  document={pdf}
+                  page={pendingTurn.target}
+                  isSinglePage={isSinglePage}
+                  isPending
+                  onPageReady={handlePendingPageReady}
+                />
+              )}
+              <BookLayer key={`spread-${page}`} document={pdf} page={page} isSinglePage={isSinglePage} />
+              <button className="page-hit page-hit-right" onClick={() => queuePageTurn("next")} aria-disabled={!canGoNext || isPageLocked || isZoomed} aria-label="下一頁" />
+            </div>
+          </div>
+          {error && <p className="reader-error error-message" role="alert">{error}</p>}
+        </section>
+      ) : (
         <section ref={readerRef} className="reader" aria-label={`${fileName} PDF 閱讀器`} aria-busy={isBusy}>
           <div className="reader-stage">
             <aside className="reader-side reader-side-left">

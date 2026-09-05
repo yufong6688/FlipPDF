@@ -569,3 +569,24 @@ button { color: inherit; }
   .book.is-turning-next *,
   .book.is-turning-previous * { animation-duration: 850ms !important; }
 }
+
+/* ── Kiosk mode (no UI chrome) ── */
+.kiosk-shell { background: #000; }
+.kiosk-shell .kiosk-loading {
+  display: flex; align-items: center; justify-content: center;
+  height: 100svh; color: #888; font-size: 1rem;
+}
+.kiosk-reader {
+  position: fixed; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  background: #000; z-index: 999;
+}
+.kiosk-viewport {
+  width: 100%; height: 100svh; display: flex;
+  align-items: center; justify-content: center;
+}
+.kiosk-viewport .book { filter: none; }
+.kiosk-reader .reader-error {
+  position: fixed; bottom: 12px; left: 50%;
+  transform: translateX(-50%); z-index: 1000;
+}
