@@ -593,13 +593,45 @@ button { color: inherit; }
 }
 .kiosk-viewport .book {
   filter: none;
-  width: min(100%, calc(100svw * 0.95));
-  max-height: calc(100svh * 0.95);
+  height: min(100svh, calc(100svh * 0.92));
+  width: auto;
+  max-width: 98svw;
 }
 .kiosk-viewport .book.is-cover {
-  width: min(100%, calc(100svw * 0.48));
+  height: min(100svh, calc(100svh * 0.92));
+  width: auto;
+  max-width: 98svw;
 }
 .kiosk-reader .reader-error {
   position: fixed; bottom: 12px; left: 50%;
   transform: translateX(-50%); z-index: 1000;
 }
+
+/* ── Floating kiosk buttons ── */
+.kiosk-buttons {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1001;
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.kiosk-buttons:hover,
+.kiosk-buttons:focus-within { opacity: 0.85; }
+.kiosk-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(4px);
+  color: #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.kiosk-btn:active { background: rgba(255,255,255,0.25); }

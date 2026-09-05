@@ -450,9 +450,6 @@ export function PdfFlipbook() {
         document.body.style.overflow = "hidden";
         document.documentElement.style.overflow = "hidden";
         void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}`, fileName);
-        setTimeout(() => {
-          document.querySelector(".reader")?.requestFullscreen?.();
-        }, 2000);
       });
       return;
     }
@@ -587,6 +584,14 @@ export function PdfFlipbook() {
               <BookLayer key={`spread-${page}`} document={pdf} page={page} isSinglePage={isSinglePage} />
               <button className="page-hit page-hit-right" onClick={() => queuePageTurn("next")} aria-disabled={!canGoNext || isPageLocked || isZoomed} aria-label="下一頁" />
             </div>
+          </div>
+          <div className="kiosk-buttons">
+            <button className="kiosk-btn kiosk-btn-fullscreen" onClick={toggleFullscreen} aria-label="全螢幕" title="全螢幕">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+            <button className="kiosk-btn kiosk-btn-normal" onClick={() => window.location.href = "/"} aria-label="正常模式" title="正常模式">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 3h5v5M8 21H3v-5m18 0v5h-5M3 8V3h5"/></svg>
+            </button>
           </div>
           {error && <p className="reader-error error-message" role="alert">{error}</p>}
         </section>
