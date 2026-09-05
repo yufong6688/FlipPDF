@@ -123,7 +123,7 @@ export function PdfFlipbook() {
   const [error, setError] = useState("");
   const [turning, setTurning] = useState<TurnDirection>(null);
   const [pendingTurn, setPendingTurn] = useState<PendingTurn>(null);
-  const [flipEffect, setFlipEffect] = useState<FlipEffect>("classic");
+  const [flipEffect, setFlipEffect] = useState<FlipEffect>("slide");
   const [isSinglePage, setIsSinglePage] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -436,6 +436,18 @@ export function PdfFlipbook() {
     const parameters = new URLSearchParams(window.location.search);
     const shareToken = parameters.get("share");
     const adminPdf = parameters.get("adminPdf");
+    const pdfFile = parameters.get("pdf");
+
+    if (pdfFile) {
+      const fileName = pdfFile.replace(/\.pdf$/i, "");
+      setIsLoading(true);
+      setError("");
+      queueMicrotask(() => {
+        void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}`, fileName);
+      });
+      return;
+    }
+
     if (!shareToken && !adminPdf) return;
 
     const mode = shareToken ? "share" : "admin";
