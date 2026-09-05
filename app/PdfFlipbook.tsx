@@ -441,10 +441,14 @@ export function PdfFlipbook() {
 
     if (pdfFile) {
       const fileName = pdfFile.replace(/\.pdf$/i, "");
+      document.title = "";
       setIsLoading(true);
       setError("");
       setIsKiosk(true);
       queueMicrotask(() => {
+        window.scrollTo(0, 0);
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
         void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}`, fileName);
         setTimeout(() => {
           document.querySelector(".reader")?.requestFullscreen?.();
