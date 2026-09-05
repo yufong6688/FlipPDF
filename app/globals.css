@@ -286,7 +286,8 @@ button { color: inherit; }
 .boundary-button,
 .fullscreen-button,
 .sound-button,
-.page-lock-button {
+.page-lock-button,
+.lock-zoom-button {
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -308,7 +309,8 @@ button { color: inherit; }
 .boundary-button:hover:not(:disabled),
 .fullscreen-button:hover,
 .sound-button:hover,
-.page-lock-button:hover:not(:disabled) { color: #c9361b; transform: translateX(2px); }
+.page-lock-button:hover:not(:disabled),
+.lock-zoom-button:hover:not(:disabled) { color: #c9361b; transform: translateX(2px); }
 .reader-side-left .side-page-button:hover:not(:disabled),
 .reader-side-left .boundary-button:hover:not(:disabled) { transform: translateX(-2px); }
 .side-page-button:disabled,
@@ -326,7 +328,8 @@ button { color: inherit; }
 .effect-picker select:disabled { opacity: 0.5; cursor: wait; }
 .fullscreen-button,
 .sound-button,
-.page-lock-button {
+.page-lock-button,
+.lock-zoom-button {
   padding: 10px 0;
   display: grid;
   gap: 4px;
@@ -335,9 +338,11 @@ button { color: inherit; }
 }
 .fullscreen-button > span:first-child,
 .sound-button > span:first-child,
-.page-lock-button > span:first-child { font-size: 25px; line-height: 1; font-weight: 400; }
+.page-lock-button > span:first-child,
+.lock-zoom-button > span:first-child { font-size: 25px; line-height: 1; font-weight: 400; }
 .page-lock-button:disabled { opacity: .45; cursor: wait; }
 .page-lock-button[aria-pressed="true"] { color: #a22816; }
+.lock-zoom-button.is-locked { color: #a22816; }
 
 .book-viewport {
   position: relative;
@@ -384,6 +389,8 @@ button { color: inherit; }
 .book.is-zoomed:active { cursor: grabbing; }
 .book.is-pan-locked,
 .book.is-pan-locked:active { cursor: not-allowed; }
+.book.is-locked,
+.book.is-locked:active { cursor: not-allowed; }
 .book.is-zoomed .page-hit { pointer-events: none; }
 .book.is-cover {
   width: min(100%, calc((100svh - 16px) * var(--page-ratio)));
@@ -542,10 +549,12 @@ button { color: inherit; }
   .effect-picker select { width: 52px; padding: 5px 2px; font-size: 8px; }
   .fullscreen-button,
   .sound-button,
-  .page-lock-button { font-size: 9px; }
+  .page-lock-button,
+  .lock-zoom-button { font-size: 9px; }
   .fullscreen-button > span:first-child,
   .sound-button > span:first-child,
-  .page-lock-button > span:first-child { font-size: 20px; }
+  .page-lock-button > span:first-child,
+  .lock-zoom-button > span:first-child { font-size: 20px; }
   .book-viewport { height: 100%; }
   .book { width: min(100%, calc((100svh - 12px) * var(--page-ratio))); max-height: calc(100svh - 12px); display: block; }
   .book-layer { display: block; }
@@ -655,3 +664,8 @@ button { color: inherit; }
 }
 .kiosk-btn:active { background: rgba(255,255,255,0.3); }
 .kiosk-btn:disabled { opacity: 0.3; cursor: default; }
+.kiosk-btn.is-active {
+  background: rgba(162,40,22,0.85);
+  border-color: rgba(255,255,255,0.5);
+  color: #fff;
+}

@@ -132,6 +132,7 @@ export function PdfFlipbook() {
   const [zoomScale, setZoomScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanLocked, setIsPanLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [pdfLibrary, setPdfLibrary] = useState<PdfLibraryItem[]>([]);
   const [remoteMode, setRemoteMode] = useState<"share" | "admin" | null>(null);
   const turnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -268,6 +269,7 @@ export function PdfFlipbook() {
   }, [turnPage]);
 
   const zoomAt = useCallback((clientX: number, clientY: number) => {
+    if (isLocked) return;
     if (pageClickTimer.current) clearTimeout(pageClickTimer.current);
     if (zoomScale > 1) {
       if (isPanLocked) return;
@@ -290,16 +292,18 @@ export function PdfFlipbook() {
     });
     setZoomScale(ZOOM_SCALE);
     setIsPanLocked(false);
-  }, [isPanLocked, zoomScale]);
+  }, [isPanLocked, zoomScale, isLocked]);
 
   const toggleZoom = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     event.preventDefault();
+    if (isLocked) return;
     // 避免觸控雙擊後，瀏覽器又合成的 dblclick 造成立即縮回
     if (performance.now() - lastTouchZoomAt.current < 500) return;
     zoomAt(event.clientX, event.clientY);
-  }, [zoomAt]);
+  }, [zoomAt, isLocked]);
 
   const handleBookPointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (isLocked) return;
     if (!isZoomed) {
       dragStart.current = event.clientX;
       if (event.pointerType !== "mouse" && lastTap.current && performance.now() - lastTap.current.time < PAGE_CLICK_DELAY) {
@@ -313,10 +317,10 @@ export function PdfFlipbook() {
       setIsPanLocked((locked) => !locked);
     }, LONG_PRESS_DURATION);
     event.currentTarget.setPointerCapture(event.pointerId);
-  }, [isZoomed, pan]);
+  }, [isZoomed, pan, isLocked]);
 
   const handleBookPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isZoomed || !panStart.current) return;
+    if (isLocked || !isZoomed || !panStart.current) return;
     const deltaX = event.clientX - panStart.current.x;
     const deltaY = event.clientY - panStart.current.y;
     if (Math.hypot(deltaX, deltaY) > 8 && longPressTimer.current) {
@@ -339,6 +343,11 @@ export function PdfFlipbook() {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
+    }
+    if (isLocked) {
+      panStart.current = null;
+      dragStart.current = null;
+      return;
     }
     if (isZoomed) {
       panStart.current = null;
@@ -365,7 +374,7 @@ export function PdfFlipbook() {
         lastTap.current = { time: now, x: event.clientX, y: event.clientY };
       }
     }
-  }, [isZoomed, turnPage, zoomAt]);
+  }, [isZoomed, turnPage, zoomAt, isLocked]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -402,6 +411,7 @@ export function PdfFlipbook() {
       setZoomScale(1);
       setPan({ x: 0, y: 0 });
       setIsPanLocked(false);
+      setIsLocked(false);
       setPageRatio(viewport.width / viewport.height);
       setFileName(name.replace(/\.pdf$/i, ""));
     } catch {
@@ -570,7 +580,7 @@ export function PdfFlipbook() {
           <div className="book-viewport kiosk-viewport">
             <div
               ref={bookRef}
-              className={`book effect-${flipEffect}${isCover && !pendingTurn ? " is-cover" : ""}${turning ? ` is-turning-${turning}` : ""}${isZoomed ? " is-zoomed" : ""}${isPanLocked ? " is-pan-locked" : ""}`}
+              className={`book effect-${flipEffect}${isCover && !pendingTurn ? " is-cover" : ""}${turning ? ` is-turning-${turning}` : ""}${isZoomed ? " is-zoomed" : ""}${isPanLocked ? " is-pan-locked" : ""}${isLocked ? " is-locked" : ""}`}
               style={bookStyle}
               onDoubleClick={toggleZoom}
               onPointerDown={handleBookPointerDown}
@@ -610,6 +620,9 @@ export function PdfFlipbook() {
             </button>
           </div>
           <div className="kiosk-buttons kiosk-buttons-topright">
+            <button className={`kiosk-btn kiosk-btn-lock${isLocked ? " is-active" : ""}`} onClick={() => setIsLocked((locked) => !locked)} aria-pressed={isLocked} aria-label={isLocked ? "解除鎖定（恢復縮放與拖曳）" : "鎖定（禁止縮放與拖曳）"} title={isLocked ? "解除鎖定" : "鎖定縮放與拖曳"}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">{isLocked ? <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></> : <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /><path d="M12 14.5v3" opacity="0.6" /></>}</svg>
+            </button>
             <button className="kiosk-btn kiosk-btn-fullscreen" onClick={toggleFullscreen} aria-label="全螢幕" title="全螢幕">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
             </button>
@@ -638,7 +651,7 @@ export function PdfFlipbook() {
             <div className="book-viewport">
               <div
                 ref={bookRef}
-                className={`book effect-${flipEffect}${isCover && !pendingTurn ? " is-cover" : ""}${turning ? ` is-turning-${turning}` : ""}${isZoomed ? " is-zoomed" : ""}${isPanLocked ? " is-pan-locked" : ""}`}
+                className={`book effect-${flipEffect}${isCover && !pendingTurn ? " is-cover" : ""}${turning ? ` is-turning-${turning}` : ""}${isZoomed ? " is-zoomed" : ""}${isPanLocked ? " is-pan-locked" : ""}${isLocked ? " is-locked" : ""}`}
                 style={bookStyle}
                 onDoubleClick={toggleZoom}
                 onPointerDown={handleBookPointerDown}
@@ -689,6 +702,16 @@ export function PdfFlipbook() {
                 <button className="fullscreen-button" onClick={toggleFullscreen} aria-pressed={isFullscreen}>
                   <span aria-hidden="true">{isFullscreen ? "×" : "⛶"}</span>
                   <span>{isFullscreen ? "退出全螢幕" : "全螢幕"}</span>
+                </button>
+                <button
+                  className={`lock-zoom-button${isLocked ? " is-locked" : ""}`}
+                  onClick={() => setIsLocked((locked) => !locked)}
+                  aria-pressed={isLocked}
+                  aria-label={isLocked ? "解除鎖定（恢復縮放與拖曳）" : "鎖定（禁止縮放與拖曳）"}
+                  title={isLocked ? "解除鎖定" : "鎖定縮放與拖曳"}
+                >
+                  <span aria-hidden="true">{isLocked ? "🔒" : "🔓"}</span>
+                  <span>{isLocked ? "已鎖定縮放" : "鎖定縮放"}</span>
                 </button>
                 <button
                   className="sound-button"
