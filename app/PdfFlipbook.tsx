@@ -445,11 +445,12 @@ export function PdfFlipbook() {
       setIsLoading(true);
       setError("");
       setIsKiosk(true);
+      const cacheBust = Date.now();
       queueMicrotask(() => {
         window.scrollTo(0, 0);
         document.body.style.overflow = "hidden";
         document.documentElement.style.overflow = "hidden";
-        void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}`, fileName);
+        void openPdf(`${ASSET_BASE}/pdfs/${encodeURIComponent(pdfFile)}?v=${cacheBust}`, fileName);
       });
       return;
     }
