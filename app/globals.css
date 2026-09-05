@@ -639,13 +639,29 @@ button { color: inherit; }
 .kiosk-buttons-topright {
   position: fixed;
   top: 14px;
-  right: 62px;
+  right: 66px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   z-index: 1001;
   opacity: 0.85;
+  transition: opacity 200ms ease, transform 200ms ease;
 }
+.kiosk-buttons-uitoggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  z-index: 1002;
+  opacity: 0.85;
+}
+.kiosk-buttons.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(8px);
+}
+.kiosk-buttons-left.is-hidden { transform: translateY(-50%) translateX(-8px); }
+.kiosk-buttons-right.is-hidden { transform: translateY(-50%) translateX(8px); }
 .kiosk-buttons-left {
   position: fixed;
   left: 62px;

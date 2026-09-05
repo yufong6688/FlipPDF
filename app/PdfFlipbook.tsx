@@ -133,6 +133,7 @@ export function PdfFlipbook() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanLocked, setIsPanLocked] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const [uiHidden, setUiHidden] = useState(false);
   const [pdfLibrary, setPdfLibrary] = useState<PdfLibraryItem[]>([]);
   const [remoteMode, setRemoteMode] = useState<"share" | "admin" | null>(null);
   const turnTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -615,7 +616,7 @@ export function PdfFlipbook() {
             aria-label="下一頁"
             tabIndex={-1}
           />
-          <div className="kiosk-buttons kiosk-buttons-left">
+          <div className={`kiosk-buttons kiosk-buttons-left${uiHidden ? " is-hidden" : ""}`}>
             <button className="kiosk-btn kiosk-btn-prev" onClick={() => turnPage("previous")} disabled={!canGoPrevious || isPageLocked || isZoomed} aria-label="向左翻頁" title="向左翻頁">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
@@ -623,7 +624,7 @@ export function PdfFlipbook() {
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 18l-6-6 6-6m8 12l-6-6 6-6"/></svg>
             </button>
           </div>
-          <div className="kiosk-buttons kiosk-buttons-right">
+          <div className={`kiosk-buttons kiosk-buttons-right${uiHidden ? " is-hidden" : ""}`}>
             <button className="kiosk-btn kiosk-btn-next" onClick={() => turnPage("next")} disabled={!canGoNext || isPageLocked || isZoomed} aria-label="向右翻頁" title="向右翻頁">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
             </button>
@@ -631,7 +632,12 @@ export function PdfFlipbook() {
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 18l6-6-6-6m-8 12l6-6-6-6"/></svg>
             </button>
           </div>
-          <div className="kiosk-buttons kiosk-buttons-topright">
+          <div className="kiosk-buttons kiosk-buttons-uitoggle">
+            <button className={`kiosk-btn kiosk-btn-uitoggle${uiHidden ? " is-active" : ""}`} onClick={() => setUiHidden((hidden) => !hidden)} aria-pressed={uiHidden} aria-label={uiHidden ? "顯示按鈕" : "隱藏按鈕"} title={uiHidden ? "顯示所有按鈕" : "隱藏所有按鈕"}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">{uiHidden ? <><circle cx="12" cy="12" r="3.2" /><path d="M2 12s3.5-6.5 10-6.5 10 6.5 10 6.5-3.5 6.5-10 6.5S2 12 2 12Z" /><path d="M21 4 3 20" opacity="0.9" /></> : <><circle cx="12" cy="12" r="3.2" /><path d="M2 12s3.5-6.5 10-6.5 10 6.5 10 6.5-3.5 6.5-10 6.5S2 12 2 12Z" /></>}</svg>
+            </button>
+          </div>
+          <div className={`kiosk-buttons kiosk-buttons-topright${uiHidden ? " is-hidden" : ""}`}>
             <button className={`kiosk-btn kiosk-btn-lock${isLocked ? " is-active" : ""}`} onClick={() => setIsLocked((locked) => !locked)} aria-pressed={isLocked} aria-label={isLocked ? "解除鎖定（恢復縮放與拖曳）" : "鎖定（禁止縮放與拖曳）"} title={isLocked ? "解除鎖定" : "鎖定縮放與拖曳"}>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">{isLocked ? <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></> : <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /><path d="M12 14.5v3" opacity="0.6" /></>}</svg>
             </button>
