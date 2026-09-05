@@ -609,13 +609,35 @@ button { color: inherit; }
 }
 
 /* ── Floating kiosk buttons ── */
-.kiosk-buttons {
+.kiosk-buttons-topright {
   position: fixed;
   top: 14px;
   right: 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  z-index: 1001;
+  opacity: 0.85;
+}
+.kiosk-buttons-left {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1001;
+  opacity: 0.85;
+}
+.kiosk-buttons-right {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   z-index: 1001;
   opacity: 0.85;
 }
@@ -632,3 +654,4 @@ button { color: inherit; }
   -webkit-tap-highlight-color: transparent;
 }
 .kiosk-btn:active { background: rgba(255,255,255,0.3); }
+.kiosk-btn:disabled { opacity: 0.3; cursor: default; }

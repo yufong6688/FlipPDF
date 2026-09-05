@@ -41,4 +41,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 # large PDFs exceeding GitHub 100MB limit
-/public/pdfs/高雄市馬公高中*.pdf
+/public/pdfs/高雄市馬公高中校友會第十九屆第一次大會手冊V2019_OK.pdf
