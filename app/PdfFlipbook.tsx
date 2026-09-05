@@ -603,6 +603,18 @@ export function PdfFlipbook() {
               <button className="page-hit page-hit-right" onClick={() => queuePageTurn("next")} aria-disabled={!canGoNext || isPageLocked || isZoomed} aria-label="下一頁" />
             </div>
           </div>
+          <button
+            className={`kiosk-tap kiosk-tap-left${isZoomed || isBusy || isLocked ? " is-disabled" : ""}`}
+            onClick={() => queuePageTurn("previous")}
+            aria-label="上一頁"
+            tabIndex={-1}
+          />
+          <button
+            className={`kiosk-tap kiosk-tap-right${isZoomed || isBusy || isLocked ? " is-disabled" : ""}`}
+            onClick={() => queuePageTurn("next")}
+            aria-label="下一頁"
+            tabIndex={-1}
+          />
           <div className="kiosk-buttons kiosk-buttons-left">
             <button className="kiosk-btn kiosk-btn-prev" onClick={() => turnPage("previous")} disabled={!canGoPrevious || isPageLocked || isZoomed} aria-label="向左翻頁" title="向左翻頁">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
