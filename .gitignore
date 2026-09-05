@@ -39,3 +39,6 @@ yarn-error.log*
 /outputs/
 /work/
 *.tsbuildinfo
+
+# large PDFs exceeding GitHub 100MB limit
+/public/pdfs/高雄市馬公高中*.pdf
