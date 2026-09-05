@@ -500,7 +500,7 @@ button { color: inherit; }
 @keyframes spread-lift-previous-out { to { transform: perspective(1600px) translateY(-4%) rotateZ(1.5deg) scale(.94); opacity: 0; filter: drop-shadow(-22px 28px 26px rgba(0,0,0,.3)); } }
 @keyframes spread-lift-in { from { transform: scale(1.035); opacity: 0; } }
 @keyframes turn-page-shading { 0%, 100% { opacity: 0; } 38%, 62% { opacity: .72; } }
-.page-hit { position: absolute; z-index: 8; top: 0; bottom: 0; width: 16%; border: 0; background: transparent; cursor: pointer; }
+.page-hit { position: absolute; z-index: 8; top: 0; bottom: 0; width: 16%; border: 0; background: transparent; cursor: pointer; touch-action: manipulation; }
 .page-hit[aria-disabled="true"] { cursor: default; }
 .page-hit-left { left: 0; }
 .page-hit-right { right: 0; }

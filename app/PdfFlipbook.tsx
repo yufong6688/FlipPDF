@@ -142,6 +142,7 @@ export function PdfFlipbook() {
   const dragStart = useRef<number | null>(null);
   const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null);
+  const lastTouchZoomAt = useRef(0);
   const suppressNextClick = useRef(false);
   const readerRef = useRef<HTMLElement>(null);
   const bookRef = useRef<HTMLDivElement>(null);
@@ -293,6 +294,8 @@ export function PdfFlipbook() {
 
   const toggleZoom = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     event.preventDefault();
+    // 避免觸控雙擊後，瀏覽器又合成的 dblclick 造成立即縮回
+    if (performance.now() - lastTouchZoomAt.current < 500) return;
     zoomAt(event.clientX, event.clientY);
   }, [zoomAt]);
 
@@ -356,6 +359,7 @@ export function PdfFlipbook() {
       if (previousTap && now - previousTap.time < PAGE_CLICK_DELAY && Math.hypot(event.clientX - previousTap.x, event.clientY - previousTap.y) < 28) {
         lastTap.current = null;
         suppressNextClick.current = true;
+        lastTouchZoomAt.current = performance.now();
         zoomAt(event.clientX, event.clientY);
       } else {
         lastTap.current = { time: now, x: event.clientX, y: event.clientY };
