@@ -571,8 +571,8 @@ button { color: inherit; }
 }
 
 /* ── Kiosk mode (no UI chrome — fullscreen book only) ── */
-.kiosk-shell { background: #000; overflow: hidden; }
-.kiosk-shell body { overflow: hidden; }
+.kiosk-shell { background: #000; overflow: hidden; position: fixed; inset: 0; }
+.kiosk-shell body { overflow: hidden; margin: 0; }
 .kiosk-shell .kiosk-loading {
   display: flex; align-items: center; justify-content: center;
   height: 100svh; width: 100svw;
@@ -593,14 +593,24 @@ button { color: inherit; }
 }
 .kiosk-viewport .book {
   filter: none;
-  height: min(100svh, calc(100svh * 0.92));
-  width: auto;
-  max-width: 98svw;
+  /* override .book base: height-priority, no max-height clamp */
+  max-height: none !important;
+  width: auto !important;
+  height: min(100svh, calc(100svh * 0.96)) !important;
+  max-width: min(98svw, calc(100svh * var(--page-ratio, 0.707) * 2 + 4px)) !important;
+  margin: 0 auto;
 }
 .kiosk-viewport .book.is-cover {
-  height: min(100svh, calc(100svh * 0.92));
-  width: auto;
-  max-width: 98svw;
+  max-height: none !important;
+  width: auto !important;
+  height: min(100svh, calc(100svh * 0.96)) !important;
+  max-width: min(98svw, calc(100svh * 0.707 + 2px)) !important;
+}
+.kiosk-viewport .book-layer {
+  height: 100%;
+}
+.kiosk-viewport canvas {
+  max-height: 100%;
 }
 .kiosk-reader .reader-error {
   position: fixed; bottom: 12px; left: 50%;
@@ -616,18 +626,14 @@ button { color: inherit; }
   flex-direction: column;
   gap: 8px;
   z-index: 1001;
-  opacity: 0.35;
-  transition: opacity 0.3s;
+  opacity: 0.5;
 }
-.kiosk-buttons:hover,
-.kiosk-buttons:focus-within { opacity: 0.85; }
 .kiosk-btn {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(4px);
-  color: #ccc;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.5);
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
